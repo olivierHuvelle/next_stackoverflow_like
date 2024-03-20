@@ -1,9 +1,11 @@
 import Link from "next/link";
+import {Suspense} from "react";
 import PostSingle from "@/app/components/page-related/home/topics/posts/post-single/post-single";
 import CommentCreateForm from "@/app/components/page-related/comment/comment-create-form";
 import CommentList from "@/app/components/page-related/comment/comment-list";
 import {getCommentsByPostId} from "@/actions/comment";
 import paths from "@/utils/paths";
+import PostSingleLoading from "@/app/components/page-related/home/topics/posts/post-single/post-single-loading";
 
 interface PostSinglePageProps {
     params: {
@@ -18,7 +20,9 @@ export default function PostSinglePage({params}: PostSinglePageProps){
     return (
         <div className="space-y-3">
             <Link href={paths.topicSingle(topicSlug)}>{"< "}Back to {topicSlug}</Link>
-            <PostSingle postId={postId} />
+            <Suspense fallback={<PostSingleLoading />}>
+                <PostSingle postId={postId} />
+            </Suspense>
             <CommentCreateForm postId={postId} startOpen={true} />
             <CommentList fetchData={() => getCommentsByPostId(postId)}  />
         </div>
