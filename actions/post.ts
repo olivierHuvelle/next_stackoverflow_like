@@ -20,7 +20,7 @@ export async function createPost(
     slug: string,
     formState: CreatePostFormState,
     formData: FormData
-): Promise <CreatePostFormState> {
+): Promise<CreatePostFormState> {
 
     const schema = z.object({
         title: z
@@ -32,7 +32,7 @@ export async function createPost(
     })
 
     const session = await auth()
-    if(!session || !session.user){
+    if (!session || !session.user) {
         return {
             errors: {
                 _form: ['You must be signed in to post a post']
@@ -55,7 +55,7 @@ export async function createPost(
         where: {slug}
     })
 
-    if(!topic){
+    if (!topic) {
         return {
             errors: {
                 _form: [`Cannot find topic with slug ${slug}`]
@@ -64,7 +64,7 @@ export async function createPost(
     }
 
     let post: Post
-    try{
+    try {
         post = await db.post.create({
             data: {
                 title: result.data.title,
@@ -73,15 +73,14 @@ export async function createPost(
                 topicId: topic.id
             }
         })
-    }catch (err: unknown){
-        if(err instanceof Error){
+    } catch (err: unknown) {
+        if (err instanceof Error) {
             return {
                 errors: {
                     _form: [err.message]
                 }
             }
-        }
-        else {
+        } else {
             return {
                 errors: {
                     _form: ['Failed to create the post']
@@ -92,4 +91,35 @@ export async function createPost(
 
     revalidatePath(paths.topicSingle(slug))
     redirect(paths.postSingle(slug, post.id))
+}
+
+// manual definition 
+// export type PostWithData = (
+//     Post & {
+//         topic: { slug: string }
+//         user: { name: string | null }
+//         _count: { comments: number }
+//     })
+
+export type PostWithData = Awaited<ReturnType<typeof getPostsByTopicSlug>>[number] // automatic typing generation
+
+export async function getPostsByTopicSlug(slug: string){
+    return db.post.findMany({
+        where: {
+            topic: {
+                slug
+            }
+        },
+        include: {
+            topic: {select: {slug: true}},
+            user: {select: {name: true}},
+            _count: {select : {comments: true}}
+        }
+    })
+}
+
+export async function getPost(postId: string){
+    return db.post.findFirst({
+        where: {id: postId}
+    })
 }
