@@ -76,3 +76,7 @@ export async function createTopic(formState: CreateTopicFormState, formData: For
     revalidatePath(paths.home())
     redirect(paths.topicSingle(topic.slug))
 }
+
+export async function getTopics(){
+    return db.topic.findMany();
+}
