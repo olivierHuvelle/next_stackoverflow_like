@@ -6,6 +6,7 @@ import {auth} from "@/auth/auth";
 import {db} from "@/db";
 import paths from "@/utils/paths";
 import {revalidatePath} from "next/cache";
+import {redirect} from "next/navigation";
 
 interface CreateCommentFormState {
     errors: {

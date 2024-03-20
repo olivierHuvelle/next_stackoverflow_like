@@ -1,6 +1,7 @@
 'use server'
 
 import type {Post} from "@prisma/client";
+
 import {z} from "zod"
 import {auth} from "@/auth/auth";
 import {redirect} from "next/navigation";
@@ -139,5 +140,21 @@ export async function getTopPosts(): Promise<PostWithData[]>{
             _count: {select : {comments: true}}
         },
         take: 5
+    })
+}
+
+export async function getPostsBySearchTerm(term: string): Promise<PostWithData[]>{
+    return db.post.findMany({
+        include: {
+            topic: {select: {slug: true}},
+            user: {select: {name: true, image: true}},
+            _count: {select : {comments: true}}
+        },
+        where: {
+            OR: [
+                {title: {contains: term}},
+                {content: {contains: term}}
+            ]
+        }
     })
 }
